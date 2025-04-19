@@ -210,7 +210,7 @@ export default function Home() {
             href="https://api.whatsapp.com/send?phone=+905511065227&text=Merhaba, bilgi alacaktım."
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center"
+            className="flex items-center ml-2"
           >
             <img
               src="/images/wp-logo.svg"
@@ -252,6 +252,92 @@ export default function Home() {
             >
               Lüks ve konforu bir arada yaşayın
             </p>
+          </div>
+
+          {/* Hakkımızda Bölümü */}
+          <div className="mb-16 text-center fade-in-animation">
+            <h2
+              className="text-3xl font-bold mb-6 metallic-text glowing-text"
+              style={{ color: colors.secondary }}
+            >
+              Hakkımızda
+            </h2>
+            <div className="max-w-4xl mx-auto">
+              <p className="text-lg leading-relaxed mb-8">
+                2010 yılından bu yana, VIP Araç Kiralama olarak müşterilerimize
+                en üst düzey konfor ve güvenliği sunuyoruz. Premium araç filomuz
+                ve profesyonel ekibimizle, her yolculuğunuzu unutulmaz bir
+                deneyime dönüştürüyoruz. İş seyahatlerinden özel günlere kadar
+                tüm ihtiyaçlarınız için, sektörün önde gelen VIP araç kiralama
+                şirketi olarak yanınızdayız. Misyonumuz, sizlere sadece bir araç
+                değil, bir prestij ve konfor deneyimi yaşatmaktır.
+              </p>
+            </div>
+          </div>
+
+          {/* Video Galeri Bölümü */}
+          <div className="mb-16">
+            <h2
+              className="text-3xl font-bold mb-8 text-center metallic-text glowing-text"
+              style={{ color: colors.secondary }}
+            >
+              Video Galeri
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div className="relative overflow-hidden rounded-lg gold-shining-border">
+                <video
+                  className="w-full aspect-video object-cover hover:scale-105 transition-transform duration-500"
+                  controls
+                >
+                  <source src="/videos/luxury-car-1.mp4" type="video/mp4" />
+                  Tarayıcınız video özelliğini desteklemiyor.
+                </video>
+                <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black to-transparent">
+                  <h3
+                    className="text-lg font-semibold"
+                    style={{ color: colors.secondary }}
+                  >
+                    VIP Mercedes Deneyimi
+                  </h3>
+                </div>
+              </div>
+
+              <div className="relative overflow-hidden rounded-lg gold-shining-border">
+                <video
+                  className="w-full aspect-video object-cover hover:scale-105 transition-transform duration-500"
+                  controls
+                >
+                  <source src="/videos/luxury-car-2.mp4" type="video/mp4" />
+                  Tarayıcınız video özelliğini desteklemiyor.
+                </video>
+                <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black to-transparent">
+                  <h3
+                    className="text-lg font-semibold"
+                    style={{ color: colors.secondary }}
+                  >
+                    BMW Konfor Dünyası
+                  </h3>
+                </div>
+              </div>
+
+              <div className="relative overflow-hidden rounded-lg gold-shining-border">
+                <video
+                  className="w-full aspect-video object-cover hover:scale-105 transition-transform duration-500"
+                  controls
+                >
+                  <source src="/videos/luxury-car-3.mp4" type="video/mp4" />
+                  Tarayıcınız video özelliğini desteklemiyor.
+                </video>
+                <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black to-transparent">
+                  <h3
+                    className="text-lg font-semibold"
+                    style={{ color: colors.secondary }}
+                  >
+                    Audi Premium Hizmet
+                  </h3>
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* Araç Carousel - Parıldayan sınırlar */}
@@ -443,6 +529,37 @@ export default function Home() {
         className="p-8 transform translate-y-12 opacity-0 transition-all duration-1000"
         style={{ backgroundColor: colors.dark }}
       >
+        {/* Mobil Sosyal Medya İkonları */}
+        <div className="md:hidden flex justify-center items-center space-x-6 mb-8">
+          <a
+            href="https://www.instagram.com/ahm4t_kurt/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-2xl hover:text-yellow-400 transition-colors metallic-hover"
+            style={{ color: colors.secondary }}
+          >
+            <i className="fab fa-instagram"></i>
+          </a>
+          <a
+            href="https://www.linkedin.com/in/ahmet-kurt-bm/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-2xl hover:text-yellow-400 transition-colors metallic-hover"
+            style={{ color: colors.secondary }}
+          >
+            <i className="fab fa-linkedin"></i>
+          </a>
+          <a
+            href="https://twitter.com/ahmet6kurt"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-2xl hover:text-yellow-400 transition-colors metallic-hover"
+            style={{ color: colors.secondary }}
+          >
+            <i className="fab fa-twitter"></i>
+          </a>
+        </div>
+
         <div className="container mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* İletişim Bilgileri */}
           <div className="flex flex-col">

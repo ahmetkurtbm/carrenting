@@ -47,7 +47,7 @@ export default function Weather() {
     <div className="bg-[#5D6D7E] text-white p-1 shadow-lg w-fit rounded-lg flex flex-col items-center">
       <h2 className="text-xs font-semibold">{weather.name} Hava Durumu</h2>
       <div className="flex flex-row items-center justify-between gap-2">
-        <p className="text-xs">{weather.main.temp}°C</p>
+        <p className="text-xs">{Math.round(weather.main.temp)}°C</p>
         <p className="text-xs capitalize">{weather.weather[0].description}</p>
         <img
           className="w-8 h-8"
