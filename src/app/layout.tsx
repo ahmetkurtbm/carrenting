@@ -21,6 +21,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="tr">
+      <head>
+        <meta name="google" content="notranslate" />
+        {/* ...existing meta tags... */}
+      </head>
       <Script src="/assets/lang-config.js" strategy="beforeInteractive" />
       <Script src="/assets/translation.js" strategy="beforeInteractive" />
       <Script

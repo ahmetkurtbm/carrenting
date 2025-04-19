@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef } from "react";
 import Weather from "./components/Weather";
 import Map from "./components/Maps";
-import { LanguageSwitcher } from "./components/language-switcher";
+import { LanguageSwitcher } from "./components/LanguageSwitcher";
 
 import "@fortawesome/fontawesome-free/css/all.min.css";
 
@@ -205,18 +205,21 @@ export default function Home() {
           {/* Ayraç - Mobile'da gizle */}
           <div className="hidden md:block h-6 w-px bg-accent"></div>
 
-          {/* WhatsApp - Sadece ikon */}
+          {/* WhatsApp - Mobilde sadece ikon, masaüstünde metin ile */}
           <a
             href="https://api.whatsapp.com/send?phone=+905511065227&text=Merhaba, bilgi alacaktım."
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center ml-2"
+            className="hidden md:flex items-center ml-2 gap-2 hover:scale-105 transition-transform"
           >
             <img
               src="/images/wp-logo.svg"
               alt="WhatsApp"
               className="h-5 md:h-6 pulse-animation"
             />
+            <span className="text-sm text-white">
+              WhatsApp Hizmetimiz 7/24 Açıktır
+            </span>
           </a>
 
           {/* Ayraç */}
