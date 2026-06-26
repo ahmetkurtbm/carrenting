@@ -2,8 +2,6 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
-import Script from "next/script";
-
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -14,6 +12,12 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+export const metadata: Metadata = {
+  title: "VIP Arac Kiralama",
+  description:
+    "Antalya ve Istanbul icin premium arac kiralama, soforlu transfer ve 7/24 rezervasyon hizmetleri.",
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -23,15 +27,7 @@ export default function RootLayout({
     <html lang="tr">
       <head>
         <meta name="google" content="notranslate" />
-        {/* ...existing meta tags... */}
       </head>
-      <Script src="/assets/lang-config.js" strategy="beforeInteractive" />
-      <Script src="/assets/translation.js" strategy="beforeInteractive" />
-      <Script
-        src="//translate.google.com/translate_a/element.js?cb=TranslateInit"
-        strategy="afterInteractive"
-      />
-
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >

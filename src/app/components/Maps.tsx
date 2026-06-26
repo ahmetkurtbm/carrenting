@@ -7,52 +7,96 @@ interface MapProps {
   address: string;
 }
 
-const Map: React.FC<MapProps> = ({ address }) => {
+export default function Map({ address }: MapProps) {
   const mapRef = useRef<HTMLDivElement>(null);
-  const [geocoder, setGeocoder] = useState<google.maps.Geocoder | null>(null);
+  const [hasMap, setHasMap] = useState(false);
+  const [failed, setFailed] = useState(false);
+  const apiKey = process.env.NEXT_PUBLIC_MAP_API_KEY;
 
   useEffect(() => {
-    const loader = new Loader({
-      apiKey: process.env.NEXT_PUBLIC_MAP_API_KEY!,
-      version: "weekly",
-    });
+    if (!apiKey || !mapRef.current) {
+      setFailed(true);
+      return;
+    }
 
-    loader.load().then(() => {
-      const _geocoder = new google.maps.Geocoder();
-      setGeocoder(_geocoder);
-    });
-  }, []);
+    const mapApiKey = apiKey;
+    let cancelled = false;
 
-  useEffect(() => {
-    if (!geocoder || !mapRef.current) return;
-
-    geocoder.geocode({ address }, (results, status) => {
-      if (status === "OK" && results && results[0]) {
-        const map = new google.maps.Map(mapRef.current as HTMLDivElement, {
-          center: results[0].geometry.location,
-          zoom: 8,
+    async function loadMap() {
+      try {
+        const loader = new Loader({
+          apiKey: mapApiKey,
+          version: "weekly",
         });
 
-        new google.maps.Marker({
-          map,
-          position: results[0].geometry.location,
+        await loader.load();
+
+        if (cancelled || !mapRef.current) {
+          return;
+        }
+
+        const geocoder = new google.maps.Geocoder();
+
+        geocoder.geocode({ address }, (results, status) => {
+          if (cancelled || !mapRef.current) {
+            return;
+          }
+
+          if (status !== "OK" || !results?.[0]) {
+            setFailed(true);
+            return;
+          }
+
+          const location = results[0].geometry.location;
+          const map = new google.maps.Map(mapRef.current, {
+            center: location,
+            zoom: 13,
+            disableDefaultUI: true,
+            zoomControl: true,
+          });
+
+          new google.maps.Marker({
+            map,
+            position: location,
+          });
+
+          setHasMap(true);
         });
-      } else {
-        console.error("Geocode error:", status);
+      } catch {
+        if (!cancelled) {
+          setFailed(true);
+        }
       }
-    });
-  }, [address, geocoder]);
+    }
+
+    loadMap();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [address, apiKey]);
 
   return (
-    <div
-      ref={mapRef}
-      style={{
-        height: "200px",
-        width: "300px",
-        borderRadius: "10px",
-      }}
-    />
+    <div className="relative h-full min-h-[260px] w-full overflow-hidden rounded-lg border border-yellow-700/40 bg-zinc-900">
+      <div ref={mapRef} className="h-full min-h-[260px] w-full" />
+      {(failed || !hasMap) && (
+        <div className="absolute inset-0 flex flex-col justify-center bg-zinc-900 p-6 text-sm text-zinc-200">
+          <span className="mb-2 text-base font-semibold text-yellow-400">
+            Konum
+          </span>
+          <span>{address}</span>
+          <a
+            className="mt-4 text-yellow-300 underline-offset-4 hover:underline"
+            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+              address
+            )}`}
+            rel="noopener noreferrer"
+            target="_blank"
+          >
+            Google Maps'te ac
+          </a>
+        </div>
+      )}
+    </div>
   );
-};
-
-export default Map;
+}
