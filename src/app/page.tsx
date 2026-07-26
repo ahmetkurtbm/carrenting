@@ -1,409 +1,516 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { FormEvent, useMemo, useState } from "react";
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import Weather from "./components/Weather";
 import Map from "./components/Maps";
-import { LanguageSwitcher } from "./components/LanguageSwitcher";
+import { Language, LanguageSwitcher } from "./components/LanguageSwitcher";
 
 type Car = {
-  name: string;
-  image: string;
-  category: string;
+  id: string;
+  model: string;
+  type: string;
+  seats: string;
+  transmission: string;
   price: string;
-  description: string;
-  features: string[];
+  accent: string;
+};
+
+type Copy = {
+  navFleet: string;
+  navServices: string;
+  navBooking: string;
+  heroBadge: string;
+  heroTitle: string;
+  heroText: string;
+  primaryCta: string;
+  secondaryCta: string;
+  fleetTitle: string;
+  fleetText: string;
+  servicesTitle: string;
+  bookingTitle: string;
+  bookingText: string;
+  pickup: string;
+  dropoff: string;
+  date: string;
+  vehicle: string;
+  send: string;
+  name: string;
+  phone: string;
+  locationTitle: string;
+  footer: string;
+  stats: string[];
+  services: { icon: string; title: string; text: string }[];
 };
 
 const cars: Car[] = [
   {
-    name: "Mercedes S-Class",
-    image: "/images/mercedes.jpeg",
-    category: "VIP Sedan",
-    price: "2500 TL / gun",
-    description:
-      "Havalimani transferi, is seyahati ve ozel davetler icin sessiz, konforlu ve prestijli yolculuk.",
-    features: ["Soforlu hizmet", "Genis ic hacim", "Deri koltuk", "Wifi"],
+    id: "economy",
+    model: "Toyota Corolla",
+    type: "Ekonomik Sedan",
+    seats: "5 koltuk",
+    transmission: "Otomatik",
+    price: "1.350 TL / gun",
+    accent: "border-sky-200 bg-sky-50 text-sky-600",
   },
   {
-    name: "BMW 7 Series",
-    image: "/images/car.svg",
-    category: "Business Class",
-    price: "2300 TL / gun",
-    description:
-      "Gunluk kiralama ve toplantilara zamaninda ulasim icin premium sedan deneyimi.",
-    features: ["VIP transfer", "Klima", "Telefon sarj", "7/24 destek"],
+    id: "suv",
+    model: "Volkswagen Tiguan",
+    type: "SUV",
+    seats: "5 koltuk",
+    transmission: "Otomatik",
+    price: "2.100 TL / gun",
+    accent: "border-emerald-200 bg-emerald-50 text-emerald-600",
   },
   {
-    name: "Audi A8",
-    image: "/images/lamborghini.svg",
-    category: "Executive",
-    price: "2400 TL / gun",
-    description:
-      "Ozel gunler, sehirler arasi yolculuklar ve misafir karsilama icin rafine secim.",
-    features: ["Profesyonel surucu", "Temiz arac", "Esnek rota", "Mini ikram"],
+    id: "van",
+    model: "Mercedes Vito",
+    type: "Genis Aile Araci",
+    seats: "8 koltuk",
+    transmission: "Otomatik",
+    price: "2.750 TL / gun",
+    accent: "border-amber-200 bg-amber-50 text-amber-600",
   },
 ];
 
-const services = [
-  {
-    icon: "fa-route",
-    title: "Havalimani Transfer",
-    text: "Ucus saatinize gore planlanan, gecikme takipli ve konforlu transfer.",
+const copy: Record<Language, Copy> = {
+  tr: {
+    navFleet: "Araçlar",
+    navServices: "Hizmetler",
+    navBooking: "Rezervasyon",
+    heroBadge: "Günlük ve haftalık araç kiralama",
+    heroTitle: "Şehir içinde veya tatilde ihtiyacınıza uygun aracı kolayca kiralayın.",
+    heroText:
+      "Temiz araçlar, net fiyatlar ve hızlı rezervasyon süreciyle modern bir rent a car deneyimi sunuyoruz.",
+    primaryCta: "Rezervasyon yap",
+    secondaryCta: "Araçları incele",
+    fleetTitle: "Popüler araç seçenekleri",
+    fleetText:
+      "Ekonomik sedan, SUV ve geniş aile araçlarıyla farklı yolculuk ihtiyaçlarına uygun seçenekler.",
+    servicesTitle: "Kiralama sürecini kolaylaştıran hizmetler",
+    bookingTitle: "Hızlı rezervasyon",
+    bookingText:
+      "Formu doldurun, talebinizi WhatsApp üzerinden hazır mesaj olarak gönderin.",
+    pickup: "Alış yeri",
+    dropoff: "Teslim yeri",
+    date: "Tarih",
+    vehicle: "Araç",
+    send: "WhatsApp ile gönder",
+    name: "Ad soyad",
+    phone: "Telefon",
+    locationTitle: "Ofis konumu",
+    footer: "AutoRent. Tüm hakları saklıdır.",
+    stats: ["Bakımlı filo", "7/24 destek", "Şeffaf fiyat"],
+    services: [
+      {
+        icon: "fa-car-side",
+        title: "Günlük kiralama",
+        text: "Kısa süreli şehir içi kullanım ve tatil planları için pratik çözümler.",
+      },
+      {
+        icon: "fa-plane-arrival",
+        title: "Havalimanı teslimi",
+        text: "Aracınızı belirlediğiniz havalimanı veya ofis noktasından teslim alın.",
+      },
+      {
+        icon: "fa-shield-halved",
+        title: "Güvenli süreç",
+        text: "Rezervasyon, ödeme ve teslim adımları açık şekilde ilerler.",
+      },
+    ],
   },
-  {
-    icon: "fa-user-tie",
-    title: "Soforlu Kiralama",
-    text: "Deneyimli suruculerle is programlariniz ve ozel gunleriniz icin hazir ekip.",
+  en: {
+    navFleet: "Cars",
+    navServices: "Services",
+    navBooking: "Booking",
+    heroBadge: "Daily and weekly car rental",
+    heroTitle: "Rent the right car for city trips, business plans, or holidays.",
+    heroText:
+      "Clean vehicles, clear pricing, and a quick booking flow for a reliable rental experience.",
+    primaryCta: "Book now",
+    secondaryCta: "View cars",
+    fleetTitle: "Popular vehicle options",
+    fleetText:
+      "Choose from economy sedans, SUVs, and spacious vans for different travel needs.",
+    servicesTitle: "Services that make renting easier",
+    bookingTitle: "Quick booking",
+    bookingText:
+      "Fill in the form and send your request as a prepared WhatsApp message.",
+    pickup: "Pick-up location",
+    dropoff: "Drop-off location",
+    date: "Date",
+    vehicle: "Vehicle",
+    send: "Send via WhatsApp",
+    name: "Full name",
+    phone: "Phone",
+    locationTitle: "Office location",
+    footer: "AutoRent. All rights reserved.",
+    stats: ["Maintained fleet", "24/7 support", "Clear pricing"],
+    services: [
+      {
+        icon: "fa-car-side",
+        title: "Daily rental",
+        text: "Practical options for short city use and holiday plans.",
+      },
+      {
+        icon: "fa-plane-arrival",
+        title: "Airport delivery",
+        text: "Pick up your car from the selected airport or office location.",
+      },
+      {
+        icon: "fa-shield-halved",
+        title: "Safe process",
+        text: "Booking, payment, and delivery steps are handled transparently.",
+      },
+    ],
   },
-  {
-    icon: "fa-headset",
-    title: "7/24 Rezervasyon",
-    text: "WhatsApp uzerinden hizli teklif, net fiyat ve anlik planlama destegi.",
+  de: {
+    navFleet: "Fahrzeuge",
+    navServices: "Service",
+    navBooking: "Buchung",
+    heroBadge: "Tages- und Wochenmiete",
+    heroTitle: "Mieten Sie bequem das passende Auto für Stadt, Arbeit oder Urlaub.",
+    heroText:
+      "Saubere Fahrzeuge, klare Preise und eine schnelle Reservierung.",
+    primaryCta: "Reservieren",
+    secondaryCta: "Fahrzeuge ansehen",
+    fleetTitle: "Beliebte Fahrzeuge",
+    fleetText: "Limousine, SUV und Van für unterschiedliche Reisepläne.",
+    servicesTitle: "Services für eine einfache Anmietung",
+    bookingTitle: "Schnelle Buchung",
+    bookingText: "Formular ausfüllen und Anfrage per WhatsApp senden.",
+    pickup: "Abholort",
+    dropoff: "Rückgabeort",
+    date: "Datum",
+    vehicle: "Fahrzeug",
+    send: "Per WhatsApp senden",
+    name: "Name",
+    phone: "Telefon",
+    locationTitle: "Bürostandort",
+    footer: "AutoRent. Alle Rechte vorbehalten.",
+    stats: ["Gepflegte Flotte", "24/7 Support", "Klare Preise"],
+    services: [
+      { icon: "fa-car-side", title: "Tagesmiete", text: "Flexible Lösungen für kurze Fahrten." },
+      { icon: "fa-plane-arrival", title: "Flughafenservice", text: "Abholung am Flughafen oder Büro." },
+      { icon: "fa-shield-halved", title: "Sicherer Ablauf", text: "Klare Schritte von Anfrage bis Übergabe." },
+    ],
   },
-];
+  es: {
+    navFleet: "Coches",
+    navServices: "Servicios",
+    navBooking: "Reserva",
+    heroBadge: "Alquiler diario y semanal",
+    heroTitle: "Alquila el coche adecuado para ciudad, trabajo o vacaciones.",
+    heroText: "Vehículos limpios, precios claros y reserva rápida.",
+    primaryCta: "Reservar",
+    secondaryCta: "Ver coches",
+    fleetTitle: "Opciones populares",
+    fleetText: "Sedanes, SUV y vans para distintas necesidades de viaje.",
+    servicesTitle: "Servicios para alquilar con facilidad",
+    bookingTitle: "Reserva rápida",
+    bookingText: "Completa el formulario y envía tu solicitud por WhatsApp.",
+    pickup: "Lugar de recogida",
+    dropoff: "Lugar de entrega",
+    date: "Fecha",
+    vehicle: "Vehículo",
+    send: "Enviar por WhatsApp",
+    name: "Nombre completo",
+    phone: "Teléfono",
+    locationTitle: "Ubicación",
+    footer: "AutoRent. Todos los derechos reservados.",
+    stats: ["Flota cuidada", "Soporte 24/7", "Precio claro"],
+    services: [
+      { icon: "fa-car-side", title: "Alquiler diario", text: "Opciones prácticas para viajes cortos." },
+      { icon: "fa-plane-arrival", title: "Entrega en aeropuerto", text: "Recoge el coche en aeropuerto u oficina." },
+      { icon: "fa-shield-halved", title: "Proceso seguro", text: "Pasos claros hasta la entrega." },
+    ],
+  },
+  fr: {
+    navFleet: "Voitures",
+    navServices: "Services",
+    navBooking: "Réservation",
+    heroBadge: "Location à la journée ou semaine",
+    heroTitle: "Louez facilement la voiture adaptée à vos trajets.",
+    heroText: "Véhicules propres, prix clairs et réservation rapide.",
+    primaryCta: "Réserver",
+    secondaryCta: "Voir les voitures",
+    fleetTitle: "Options populaires",
+    fleetText: "Berlines, SUV et vans pour différents besoins.",
+    servicesTitle: "Des services simples pour votre location",
+    bookingTitle: "Réservation rapide",
+    bookingText: "Remplissez le formulaire et envoyez la demande via WhatsApp.",
+    pickup: "Lieu de départ",
+    dropoff: "Lieu de retour",
+    date: "Date",
+    vehicle: "Véhicule",
+    send: "Envoyer via WhatsApp",
+    name: "Nom complet",
+    phone: "Téléphone",
+    locationTitle: "Adresse",
+    footer: "AutoRent. Tous droits réservés.",
+    stats: ["Flotte entretenue", "Support 24/7", "Prix clairs"],
+    services: [
+      { icon: "fa-car-side", title: "Location journalière", text: "Solutions pratiques pour les courts trajets." },
+      { icon: "fa-plane-arrival", title: "Livraison aéroport", text: "Retrait à l'aéroport ou au bureau." },
+      { icon: "fa-shield-halved", title: "Processus sûr", text: "Étapes simples jusqu'à la remise." },
+    ],
+  },
+};
 
-const stats = [
-  ["14+", "Yil deneyim"],
-  ["1200+", "Tamamlanan transfer"],
-  ["4.9", "Musteri puani"],
-];
+function CarGlyph({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 64 32" xmlns="http://www.w3.org/2000/svg">
+      <path
+        d="M5 21.5h2.8a5.2 5.2 0 0 1 9.4 0h19.6a5.2 5.2 0 0 1 9.4 0H51a3 3 0 0 0 3-3v-3a2 2 0 0 0-.8-1.6l-8.3-6.3a6 6 0 0 0-3.6-1.2H22.6a6 6 0 0 0-4 1.5l-6.2 5.5-4.6 2.6A3 3 0 0 0 6 18.2v0a3 3 0 0 0 3 3Z"
+        stroke="currentColor"
+        strokeLinejoin="round"
+        strokeWidth="1.6"
+      />
+      <path d="M20 12.5h9M32 12.5h9" stroke="currentColor" strokeLinecap="round" strokeWidth="1.3" />
+      <circle cx="17.5" cy="21.5" fill="white" r="3.6" stroke="currentColor" strokeWidth="1.6" />
+      <circle cx="43.5" cy="21.5" fill="white" r="3.6" stroke="currentColor" strokeWidth="1.6" />
+    </svg>
+  );
+}
+
+function CarPlaceholder({ car }: { car: Car }) {
+  return (
+    <div className={`flex aspect-[16/10] items-center justify-center rounded-lg border ${car.accent}`}>
+      <CarGlyph className="h-16 w-32 sm:h-20 sm:w-40" />
+    </div>
+  );
+}
+
+const inputClass =
+  "mt-2 w-full rounded-lg border border-slate-300 px-3 py-3 font-normal outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100";
 
 export default function Home() {
-  const [currentCar, setCurrentCar] = useState(0);
+  const [language, setLanguage] = useState<Language>("tr");
+  const [booking, setBooking] = useState({
+    name: "",
+    phone: "",
+    pickup: "Antalya Havalimani",
+    dropoff: "Antalya Merkez",
+    date: "",
+    vehicle: cars[0].model,
+  });
 
-  useEffect(() => {
-    const timer = window.setInterval(() => {
-      setCurrentCar((current) => (current + 1) % cars.length);
-    }, 6000);
+  const t = copy[language];
 
-    return () => window.clearInterval(timer);
-  }, []);
+  const whatsappLink = useMemo(() => {
+    const message = [
+      "Merhaba, arac kiralama bilgisi almak istiyorum.",
+      `Ad: ${booking.name || "-"}`,
+      `Telefon: ${booking.phone || "-"}`,
+      `Alis: ${booking.pickup || "-"}`,
+      `Teslim: ${booking.dropoff || "-"}`,
+      `Tarih: ${booking.date || "-"}`,
+      `Arac: ${booking.vehicle}`,
+    ].join("\n");
 
-  const selectedCar = cars[currentCar];
-  const whatsAppLink = useMemo(() => {
-    const message = `Merhaba, ${selectedCar.name} icin rezervasyon bilgisi almak istiyorum.`;
-    return `https://api.whatsapp.com/send?phone=905511065227&text=${encodeURIComponent(
-      message
-    )}`;
-  }, [selectedCar.name]);
+    return `https://api.whatsapp.com/send?phone=905511065227&text=${encodeURIComponent(message)}`;
+  }, [booking]);
+
+  function updateBooking(field: keyof typeof booking, value: string) {
+    setBooking((current) => ({ ...current, [field]: value }));
+  }
+
+  function submitBooking(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    window.open(whatsappLink, "_blank", "noopener,noreferrer");
+  }
 
   return (
-    <main className="min-h-screen bg-[#101214] text-zinc-100">
-      <header className="sticky top-0 z-50 border-b border-white/10 bg-[#101214]/90 backdrop-blur">
+    <main className="min-h-screen bg-slate-50 text-slate-900">
+      <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/90 backdrop-blur">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 md:px-8">
           <a className="flex items-center gap-3" href="#top">
-            <span className="flex h-11 w-11 items-center justify-center rounded-full border border-yellow-500/40 bg-zinc-950">
-              <img
-                src="/images/lamborghini.svg"
-                alt=""
-                className="h-7 w-7 object-contain"
-              />
+            <span className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-900 text-sm font-bold tracking-tight text-slate-900">
+              A
             </span>
-            <span className="leading-tight">
-              <span className="block text-sm font-semibold uppercase tracking-[0.2em] text-yellow-400">
-                VIP Rent
-              </span>
-              <span className="hidden text-xs text-zinc-400 sm:block">
-                Premium arac kiralama
-              </span>
-            </span>
+            <span className="text-lg font-bold tracking-tight">AutoRent</span>
           </a>
 
-          <nav className="hidden items-center gap-6 text-sm text-zinc-300 md:flex">
-            <a className="transition hover:text-yellow-300" href="#fleet">
-              Filomuz
-            </a>
-            <a className="transition hover:text-yellow-300" href="#services">
-              Hizmetler
-            </a>
-            <a className="transition hover:text-yellow-300" href="#contact">
-              Iletisim
-            </a>
+          <nav className="hidden items-center gap-6 text-sm font-medium text-slate-600 md:flex">
+            <a className="hover:text-blue-700" href="#fleet">{t.navFleet}</a>
+            <a className="hover:text-blue-700" href="#services">{t.navServices}</a>
+            <a className="hover:text-blue-700" href="#booking">{t.navBooking}</a>
           </nav>
 
           <div className="flex items-center gap-2">
             <div className="hidden lg:block">
               <Weather />
             </div>
-            <LanguageSwitcher />
-            <a
-              className="hidden rounded-lg bg-yellow-400 px-4 py-2 text-sm font-semibold text-zinc-950 transition hover:bg-yellow-300 sm:inline-flex"
-              href={whatsAppLink}
-              rel="noopener noreferrer"
-              target="_blank"
-            >
-              Teklif al
-            </a>
+            <LanguageSwitcher value={language} onChange={setLanguage} />
           </div>
         </div>
       </header>
 
-      <section
-        className="relative overflow-hidden border-b border-white/10"
-        id="top"
-      >
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_15%_20%,rgba(212,175,55,0.22),transparent_34%),linear-gradient(135deg,rgba(16,18,20,0.9),rgba(20,28,32,0.78))]" />
-        <div className="mx-auto grid min-h-[calc(100vh-76px)] max-w-7xl items-center gap-10 px-4 py-12 md:grid-cols-[0.95fr_1.05fr] md:px-8">
-          <div className="relative z-10">
-            <p className="mb-4 inline-flex rounded-full border border-yellow-500/30 bg-yellow-500/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-yellow-300">
-              Antalya ve Istanbul
+      <section id="top" className="border-b border-slate-200 bg-white">
+        <div className="mx-auto grid min-h-[calc(100vh-68px)] max-w-7xl items-center gap-10 px-4 py-12 md:grid-cols-[1fr_0.9fr] md:px-8">
+          <div>
+            <p className="mb-4 inline-flex rounded-full bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-700">
+              {t.heroBadge}
             </p>
-            <h1 className="max-w-3xl text-4xl font-bold leading-tight text-white md:text-6xl">
-              Soforlu VIP arac kiralama deneyimini net, hizli ve guvenli hale
-              getirin.
+            <h1 className="max-w-3xl text-4xl font-bold leading-tight text-slate-950 md:text-6xl">
+              {t.heroTitle}
             </h1>
-            <p className="mt-6 max-w-2xl text-base leading-8 text-zinc-300 md:text-lg">
-              Is seyahati, havalimani transferi, ozel davet ve gunluk premium
-              ulasim ihtiyaclariniz icin bakimli araclar ve profesyonel ekip.
+            <p className="mt-6 max-w-2xl text-base leading-8 text-slate-600 md:text-lg">
+              {t.heroText}
             </p>
-
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <a
-                className="inline-flex items-center justify-center gap-2 rounded-lg bg-yellow-400 px-5 py-3 font-semibold text-zinc-950 transition hover:bg-yellow-300"
-                href={whatsAppLink}
-                rel="noopener noreferrer"
-                target="_blank"
-              >
-                <i className="fab fa-whatsapp" />
-                WhatsApp ile rezervasyon
+              <a className="inline-flex items-center justify-center rounded-lg bg-blue-600 px-5 py-3 font-semibold text-white shadow-sm hover:bg-blue-700" href="#booking">
+                {t.primaryCta}
               </a>
-              <a
-                className="inline-flex items-center justify-center gap-2 rounded-lg border border-white/15 px-5 py-3 font-semibold text-white transition hover:border-yellow-400/70 hover:text-yellow-300"
-                href="#fleet"
-              >
-                Filoyu incele
-                <i className="fas fa-arrow-right text-sm" />
+              <a className="inline-flex items-center justify-center rounded-lg border border-slate-300 px-5 py-3 font-semibold text-slate-800 hover:border-blue-300 hover:text-blue-700" href="#fleet">
+                {t.secondaryCta}
               </a>
             </div>
-
-            <div className="mt-10 grid max-w-xl grid-cols-3 gap-3">
-              {stats.map(([value, label]) => (
-                <div
-                  className="rounded-lg border border-white/10 bg-white/[0.04] p-4"
-                  key={label}
-                >
-                  <p className="text-2xl font-bold text-yellow-300">{value}</p>
-                  <p className="mt-1 text-xs text-zinc-400">{label}</p>
+            <div className="mt-10 grid max-w-2xl gap-3 sm:grid-cols-3">
+              {t.stats.map((item) => (
+                <div className="rounded-lg border border-slate-200 bg-slate-50 p-4 text-sm font-semibold text-slate-700" key={item}>
+                  <i className="fas fa-check-circle mr-2 text-blue-600" />
+                  {item}
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="relative z-10">
-            <div className="overflow-hidden rounded-lg border border-yellow-500/30 bg-zinc-950 shadow-2xl shadow-black/40">
-              <div className="relative aspect-[4/3] md:aspect-[16/11]">
-                <img
-                  className="h-full w-full object-cover"
-                  src="/images/mercedes.jpeg"
-                  alt="Mercedes VIP arac"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-transparent to-transparent" />
-                <div className="absolute bottom-0 left-0 right-0 p-5">
-                  <p className="text-sm uppercase tracking-[0.18em] text-yellow-300">
-                    Hazir filo
-                  </p>
-                  <p className="mt-1 text-2xl font-bold text-white">
-                    Premium transfer ve gunluk kiralama
-                  </p>
-                </div>
-              </div>
+          <div className="rounded-lg border border-slate-200 bg-slate-100 p-4 shadow-sm">
+            <CarPlaceholder car={cars[1]} />
+            <div className="mt-4 grid gap-3 sm:grid-cols-3">
+              {cars.map((car) => (
+                <button
+                  className={`rounded-lg border p-3 text-left text-sm transition ${
+                    booking.vehicle === car.model
+                      ? "border-blue-500 bg-blue-50"
+                      : "border-slate-200 bg-white hover:border-blue-200"
+                  }`}
+                  key={car.id}
+                  onClick={() => updateBooking("vehicle", car.model)}
+                  type="button"
+                >
+                  <span className="block font-semibold">{car.model}</span>
+                  <span className="text-slate-500">{car.price}</span>
+                </button>
+              ))}
             </div>
           </div>
         </div>
       </section>
 
-      <section className="bg-[#15191c] py-16" id="services">
+      <section id="fleet" className="py-16">
         <div className="mx-auto max-w-7xl px-4 md:px-8">
-          <div className="mb-10 flex flex-col justify-between gap-4 md:flex-row md:items-end">
-            <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.18em] text-yellow-300">
-                Hizmetler
-              </p>
-              <h2 className="mt-3 text-3xl font-bold text-white md:text-4xl">
-                Yolculugu basitlestiren premium servisler
-              </h2>
-            </div>
-            <p className="max-w-xl text-sm leading-7 text-zinc-400">
-              Fiyat, rota, arac ve zamanlama bilgisi rezervasyon oncesinde
-              netlesir. Surpriz maliyet olmadan plan yaparsiniz.
-            </p>
+          <div className="mb-8 max-w-2xl">
+            <h2 className="text-3xl font-bold text-slate-950">{t.fleetTitle}</h2>
+            <p className="mt-3 leading-7 text-slate-600">{t.fleetText}</p>
           </div>
-
-          <div className="grid gap-4 md:grid-cols-3">
-            {services.map((service) => (
-              <article
-                className="rounded-lg border border-white/10 bg-[#101214] p-6 transition hover:border-yellow-500/50"
-                key={service.title}
-              >
-                <span className="mb-5 flex h-12 w-12 items-center justify-center rounded-lg bg-yellow-400 text-zinc-950">
-                  <i className={`fas ${service.icon}`} />
-                </span>
-                <h3 className="text-xl font-semibold text-white">
-                  {service.title}
-                </h3>
-                <p className="mt-3 text-sm leading-7 text-zinc-400">
-                  {service.text}
-                </p>
+          <div className="grid gap-5 md:grid-cols-3">
+            {cars.map((car) => (
+              <article className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm transition hover:shadow-md" key={car.id}>
+                <CarPlaceholder car={car} />
+                <div className="mt-5">
+                  <p className="text-sm font-medium text-blue-700">{car.type}</p>
+                  <h3 className="mt-1 text-xl font-bold">{car.model}</h3>
+                  <div className="mt-4 flex flex-wrap gap-2 text-sm text-slate-600">
+                    <span className="rounded-full bg-slate-100 px-3 py-1">{car.seats}</span>
+                    <span className="rounded-full bg-slate-100 px-3 py-1">{car.transmission}</span>
+                  </div>
+                  <div className="mt-5 flex items-center justify-between">
+                    <p className="font-bold text-slate-950">{car.price}</p>
+                    <button
+                      className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+                      onClick={() => {
+                        updateBooking("vehicle", car.model);
+                        document.getElementById("booking")?.scrollIntoView({ behavior: "smooth" });
+                      }}
+                      type="button"
+                    >
+                      {t.navBooking}
+                    </button>
+                  </div>
+                </div>
               </article>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="py-16" id="fleet">
+      <section id="services" className="border-y border-slate-200 bg-white py-16">
         <div className="mx-auto max-w-7xl px-4 md:px-8">
-          <div className="mb-10 flex flex-col justify-between gap-4 md:flex-row md:items-end">
-            <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.18em] text-yellow-300">
-                Filo
-              </p>
-              <h2 className="mt-3 text-3xl font-bold text-white md:text-4xl">
-                Ihtiyaca gore secilen araclar
-              </h2>
-            </div>
-            <div className="flex gap-2">
-              {cars.map((car, index) => (
-                <button
-                  className={`h-3 rounded-full transition-all ${
-                    currentCar === index
-                      ? "w-9 bg-yellow-400"
-                      : "w-3 bg-zinc-700 hover:bg-zinc-500"
-                  }`}
-                  key={car.name}
-                  onClick={() => setCurrentCar(index)}
-                  type="button"
-                  aria-label={`${car.name} sec`}
-                />
-              ))}
-            </div>
-          </div>
-
-          <div className="grid overflow-hidden rounded-lg border border-white/10 bg-[#15191c] md:grid-cols-[0.95fr_1.05fr]">
-            <div className="relative min-h-[320px] bg-zinc-950">
-              <img
-                className="h-full min-h-[320px] w-full object-contain p-8"
-                src={selectedCar.image}
-                alt={selectedCar.name}
-              />
-            </div>
-            <div className="p-6 md:p-10">
-              <p className="text-sm font-semibold uppercase tracking-[0.18em] text-yellow-300">
-                {selectedCar.category}
-              </p>
-              <h3 className="mt-3 text-3xl font-bold text-white">
-                {selectedCar.name}
-              </h3>
-              <p className="mt-4 text-base leading-8 text-zinc-300">
-                {selectedCar.description}
-              </p>
-              <p className="mt-6 text-2xl font-bold text-yellow-300">
-                {selectedCar.price}
-              </p>
-              <div className="mt-6 grid gap-3 sm:grid-cols-2">
-                {selectedCar.features.map((feature) => (
-                  <div
-                    className="flex items-center gap-3 rounded-lg bg-white/[0.04] px-4 py-3 text-sm text-zinc-200"
-                    key={feature}
-                  >
-                    <i className="fas fa-check text-yellow-300" />
-                    {feature}
-                  </div>
-                ))}
-              </div>
-              <a
-                className="mt-8 inline-flex items-center justify-center gap-2 rounded-lg bg-yellow-400 px-5 py-3 font-semibold text-zinc-950 transition hover:bg-yellow-300"
-                href={whatsAppLink}
-                rel="noopener noreferrer"
-                target="_blank"
-              >
-                Bu arac icin teklif al
-                <i className="fas fa-arrow-right text-sm" />
-              </a>
-            </div>
+          <h2 className="max-w-2xl text-3xl font-bold text-slate-950">{t.servicesTitle}</h2>
+          <div className="mt-8 grid gap-5 md:grid-cols-3">
+            {t.services.map((service) => (
+              <article className="rounded-lg border border-slate-200 bg-slate-50 p-6 transition hover:border-blue-200 hover:bg-white hover:shadow-sm" key={service.title}>
+                <span className="flex h-11 w-11 items-center justify-center rounded-lg bg-blue-600 text-white">
+                  <i className={`fas ${service.icon}`} />
+                </span>
+                <h3 className="mt-5 text-xl font-bold">{service.title}</h3>
+                <p className="mt-3 leading-7 text-slate-600">{service.text}</p>
+              </article>
+            ))}
           </div>
         </div>
       </section>
 
-      <section className="bg-[#15191c] py-16" id="contact">
-        <div className="mx-auto grid max-w-7xl gap-8 px-4 md:grid-cols-[0.8fr_1.2fr] md:px-8">
+      <section id="booking" className="py-16">
+        <div className="mx-auto grid max-w-7xl gap-8 px-4 md:grid-cols-[0.9fr_1.1fr] md:px-8">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-yellow-300">
-              Iletisim
-            </p>
-            <h2 className="mt-3 text-3xl font-bold text-white md:text-4xl">
-              Rezervasyon icin hizli iletisim
-            </h2>
-            <div className="mt-8 space-y-4 text-zinc-300">
-              <p className="flex items-center gap-3">
-                <i className="fas fa-phone text-yellow-300" />
-                +90 551 106 5227
-              </p>
-              <p className="flex items-center gap-3">
-                <i className="fas fa-envelope text-yellow-300" />
-                info@viprentacar.com
-              </p>
-              <p className="flex items-center gap-3">
-                <i className="fas fa-clock text-yellow-300" />
-                Her gun 08:00 - 22:00
-              </p>
+            <h2 className="text-3xl font-bold text-slate-950">{t.bookingTitle}</h2>
+            <p className="mt-3 leading-7 text-slate-600">{t.bookingText}</p>
+            <div className="mt-8">
+              <h3 className="mb-3 text-lg font-bold">{t.locationTitle}</h3>
+              <Map address="Ataturk Mah. 100. Yil Bulvari No:120, Istanbul" />
             </div>
-            <a
-              className="mt-8 inline-flex items-center justify-center gap-2 rounded-lg bg-[#25D366] px-5 py-3 font-semibold text-zinc-950 transition hover:brightness-110"
-              href={whatsAppLink}
-              rel="noopener noreferrer"
-              target="_blank"
-            >
-              <i className="fab fa-whatsapp" />
-              WhatsApp'tan yaz
-            </a>
           </div>
 
-          <Map address="Ataturk Mah. 100. Yil Bulvari No:120, Istanbul" />
+          <form className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm md:p-6" onSubmit={submitBooking}>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <label className="text-sm font-semibold">
+                {t.name}
+                <input className={inputClass} value={booking.name} onChange={(event) => updateBooking("name", event.target.value)} placeholder={t.name} />
+              </label>
+              <label className="text-sm font-semibold">
+                {t.phone}
+                <input className={inputClass} value={booking.phone} onChange={(event) => updateBooking("phone", event.target.value)} placeholder="+90" />
+              </label>
+              <label className="text-sm font-semibold">
+                {t.pickup}
+                <input className={inputClass} value={booking.pickup} onChange={(event) => updateBooking("pickup", event.target.value)} />
+              </label>
+              <label className="text-sm font-semibold">
+                {t.dropoff}
+                <input className={inputClass} value={booking.dropoff} onChange={(event) => updateBooking("dropoff", event.target.value)} />
+              </label>
+              <label className="text-sm font-semibold">
+                {t.date}
+                <input className={inputClass} type="date" value={booking.date} onChange={(event) => updateBooking("date", event.target.value)} />
+              </label>
+              <label className="text-sm font-semibold">
+                {t.vehicle}
+                <select className={inputClass} value={booking.vehicle} onChange={(event) => updateBooking("vehicle", event.target.value)}>
+                  {cars.map((car) => (
+                    <option key={car.id} value={car.model}>{car.model}</option>
+                  ))}
+                </select>
+              </label>
+            </div>
+            <button className="mt-6 flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-5 py-3 font-semibold text-white hover:bg-blue-700" type="submit">
+              <i className="fab fa-whatsapp" />
+              {t.send}
+            </button>
+          </form>
         </div>
       </section>
 
-      <footer className="border-t border-white/10 bg-[#101214] px-4 py-8 md:px-8">
-        <div className="mx-auto flex max-w-7xl flex-col justify-between gap-4 text-sm text-zinc-400 md:flex-row md:items-center">
-          <p>© {new Date().getFullYear()} VIP Rent. Tum haklari saklidir.</p>
-          <div className="flex gap-4 text-lg text-yellow-300">
-            <a
-              aria-label="Instagram"
-              href="https://www.instagram.com/ahm4t_kurt/"
-              rel="noopener noreferrer"
-              target="_blank"
-            >
-              <i className="fab fa-instagram" />
-            </a>
-            <a
-              aria-label="LinkedIn"
-              href="https://www.linkedin.com/in/ahmet-kurt-bm/"
-              rel="noopener noreferrer"
-              target="_blank"
-            >
-              <i className="fab fa-linkedin" />
-            </a>
-            <a
-              aria-label="Twitter"
-              href="https://twitter.com/ahmet6kurt"
-              rel="noopener noreferrer"
-              target="_blank"
-            >
-              <i className="fab fa-twitter" />
-            </a>
-          </div>
+      <footer className="border-t border-slate-200 bg-white px-4 py-8 md:px-8">
+        <div className="mx-auto flex max-w-7xl flex-col justify-between gap-3 text-sm text-slate-500 md:flex-row md:items-center">
+          <p>© {new Date().getFullYear()} {t.footer}</p>
+          <a className="font-semibold text-blue-700 hover:text-blue-900" href="#booking">
+            {t.primaryCta}
+          </a>
         </div>
       </footer>
-
-      <a
-        className="fixed bottom-5 right-5 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-[#25D366] shadow-xl transition hover:scale-105"
-        href={whatsAppLink}
-        rel="noopener noreferrer"
-        target="_blank"
-        aria-label="WhatsApp"
-      >
-        <img src="/images/whatsapp.svg" alt="" className="h-8 w-8" />
-      </a>
     </main>
   );
 }

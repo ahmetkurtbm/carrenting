@@ -77,16 +77,16 @@ export default function Map({ address }: MapProps) {
   }, [address, apiKey]);
 
   return (
-    <div className="relative h-full min-h-[260px] w-full overflow-hidden rounded-lg border border-yellow-700/40 bg-zinc-900">
+    <div className="relative h-full min-h-[260px] w-full overflow-hidden rounded-lg border border-slate-200 bg-slate-900">
       <div ref={mapRef} className="h-full min-h-[260px] w-full" />
       {(failed || !hasMap) && (
-        <div className="absolute inset-0 flex flex-col justify-center bg-zinc-900 p-6 text-sm text-zinc-200">
-          <span className="mb-2 text-base font-semibold text-yellow-400">
+        <div className="absolute inset-0 flex flex-col justify-center bg-slate-900 p-6 text-sm text-slate-200">
+          <span className="mb-2 text-base font-semibold text-blue-400">
             Konum
           </span>
           <span>{address}</span>
           <a
-            className="mt-4 text-yellow-300 underline-offset-4 hover:underline"
+            className="mt-4 text-blue-300 underline-offset-4 hover:underline"
             href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
               address
             )}`}
