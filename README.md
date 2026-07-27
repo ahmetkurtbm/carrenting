@@ -1,36 +1,96 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AutoRent — Araç Kiralama Sitesi
 
-## Getting Started
+Next.js 15 (App Router) + Tailwind CSS v4 ile yazılmış, Supabase destekli araç
+kiralama sitesi. Ziyaretçiler rezervasyon talebi bırakır, talepler veritabanına
+kaydedilir ve GateHub ile korunan yönetim panelinden yönetilir.
 
-First, run the development server:
+## Özellikler
+
+- **Tek sayfa tanıtım sitesi** — 5 dil (TR/EN/DE/ES/FR), istemci tarafı sözlükle
+- **Veritabanı destekli filo** — araçlar `rental_cars` tablosundan okunur, fiyat
+  değişikliği için deploy gerekmez
+- **Rezervasyon sistemi** — talepler `rental_bookings` tablosuna yazılır, ardından
+  hazır WhatsApp mesajı açılır
+- **Müsaitlik kontrolü** — seçilen tarihlerde araç doluysa ziyaretçi uyarılır
+- **Yönetim paneli** (`/admin`) — talepleri onaylama/iptal etme, filo düzenleme
+- **SEO** — metadata, sitemap, robots, üretilen OG görseli, JSON-LD (`AutoRental`)
+- **Analitik** — Vercel Analytics + Speed Insights
+
+## Kurulum
+
+```bash
+npm install
+cp .env.example .env.local
+```
+
+`.env.local` içindeki değerleri doldurun (ayrıntılar dosyanın içinde).
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Site `http://localhost:3100` adresinde açılır.
 
-You can start editing the page by modifying `cd app/page.tsx`. The page auto-updates as you edit the file.
+### GateHub OAuth kaydı (yönetim paneli girişi için)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Yönetim paneli, kendi barındırdığınız GateHub kimlik sağlayıcısıyla korunur.
+Kayıt, GateHub'ın kendi arayüzünden yapılmalıdır — client secret veritabanında
+SHA-256 hash olarak saklandığı için elle SQL ile kayıt eklenemez.
 
-## Learn More
+1. GateHub'ı çalıştırıp `/dashboard` sayfasını açın
+2. "Yeni uygulama" formunu doldurun:
+   - **Ad**: `carrenting`
+   - **Redirect URI**: `http://localhost:3100/api/auth/callback/gatehub`
+     (production için kendi alan adınızla aynı yolu ekleyin)
+3. Bir kez gösterilen `client_id` ve `client_secret` değerlerini `.env.local`
+   dosyasındaki `GATEHUB_CLIENT_ID` / `GATEHUB_CLIENT_SECRET` alanlarına yazın
+4. `ADMIN_EMAILS` alanına panele girebilecek e-posta adres(ler)ini yazın
 
-To learn more about Next.js, take a look at the following resources:
+## Veritabanı
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Tablolar Supabase'deki **receiptflow** projesinde `rental_` önekiyle durur:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+| Tablo | Amaç |
+| --- | --- |
+| `rental_cars` | Filo: model, tip, koltuk, vites, günlük fiyat, sıra, yayın durumu |
+| `rental_bookings` | Rezervasyon talepleri: müşteri, tarih aralığı, araç, durum |
 
-## Deploy on Vercel
+Her iki tabloda RLS açıktır ve **hiç policy yoktur** — yani anon anahtarıyla
+dışarıdan erişilemez. Tüm okuma/yazma, Next.js sunucu tarafında `service_role`
+anahtarıyla yapılır (`src/lib/supabase.ts`).
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Komutlar
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+npm run dev     # geliştirme sunucusu (port 3100)
+npm run build   # production derlemesi
+npm run start   # derlenmiş uygulamayı çalıştırır
+npm run lint    # tsc --noEmit ile tip kontrolü
+```
+
+## Vercel'e dağıtım
+
+1. Projeyi Vercel'e bağlayın
+2. `.env.example` içindeki tüm değişkenleri Vercel proje ayarlarına ekleyin
+3. `NEXT_PUBLIC_SITE_URL` değerini gerçek alan adınıza ayarlayın
+4. GateHub'daki uygulama kaydına production redirect URI'sini de ekleyin
+
+## Proje yapısı
+
+```
+src/
+├── auth.ts                 NextAuth + GateHub OIDC yapılandırması
+├── middleware.ts           /admin korumasi
+├── lib/
+│   ├── supabase.ts         service_role istemcisi (server-only)
+│   ├── rental.ts           veri erişim fonksiyonları
+│   ├── types.ts            paylaşılan tipler
+│   ├── format.ts           fiyat/tarih biçimlendirme
+│   └── site.ts             kanonik site adresi
+└── app/
+    ├── page.tsx            ana sayfa (server) + JSON-LD
+    ├── HomeContent.tsx     tüm arayüz ve dil sözlüğü (client)
+    ├── actions.ts          rezervasyon server action'ı
+    ├── admin/              yönetim paneli
+    └── components/         LanguageSwitcher, Weather, Maps
+```
