@@ -74,10 +74,12 @@ export default async function AdminBookingsPage({
     );
   }
 
-  const [bookings, allBookings] = await Promise.all([
-    listBookings(filter),
-    listBookings(),
-  ]);
+  // One query for everything: the summary needs the full set anyway, and the
+  // filtered list is a cheap in-memory narrowing of it.
+  const allBookings = await listBookings();
+  const bookings = filter
+    ? allBookings.filter((booking) => booking.status === filter)
+    : allBookings;
 
   const pendingCount = allBookings.filter((b) => b.status === "pending").length;
   const confirmedCount = allBookings.filter((b) => b.status === "confirmed").length;

@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useMemo, useState, useTransition } from "react";
+import { FormEvent, useState, useTransition } from "react";
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import Weather from "./components/Weather";
 import Map from "./components/Maps";
@@ -11,6 +11,12 @@ import type { Car } from "@/lib/types";
 
 const WHATSAPP_PHONE = "905511065227";
 const OFFICE_ADDRESS = "Ataturk Mah. 100. Yil Bulvari No:120, Istanbul";
+
+// Secondary contact channel for visitors who would rather chat than fill in the
+// form. The form itself no longer opens WhatsApp — it notifies us by e-mail.
+const WHATSAPP_URL = `https://api.whatsapp.com/send?phone=${WHATSAPP_PHONE}&text=${encodeURIComponent(
+  "Merhaba, arac kiralama hakkinda bilgi almak istiyorum."
+)}`;
 
 type Copy = {
   navFleet: string;
@@ -41,6 +47,8 @@ type Copy = {
   conflictMsg: string;
   validationMsg: string;
   errorMsg: string;
+  whatsappHint: string;
+  whatsappCta: string;
   locationTitle: string;
   footer: string;
   stats: string[];
@@ -65,7 +73,7 @@ const copy: Record<Language, Copy> = {
     servicesTitle: "Kiralama sürecini kolaylaştıran hizmetler",
     bookingTitle: "Hızlı rezervasyon",
     bookingText:
-      "Formu doldurun, talebiniz kaydedilsin ve WhatsApp üzerinden hazır mesaj olarak iletilsin.",
+      "Formu doldurun, talebinizi alalım ve en kısa sürede size dönelim.",
     pickup: "Alış yeri",
     dropoff: "Teslim yeri",
     pickupDate: "Alış tarihi",
@@ -81,6 +89,8 @@ const copy: Record<Language, Copy> = {
       "Talebiniz alındı. Ancak seçtiğiniz tarihlerde bu araç dolu görünüyor; alternatif için sizinle iletişime geçeceğiz.",
     validationMsg: "Lütfen tüm alanları doldurun ve dönüş tarihinin alış tarihinden sonra olduğundan emin olun.",
     errorMsg: "Talebiniz kaydedilemedi. Lütfen tekrar deneyin veya bizi arayın.",
+    whatsappHint: "Hemen konuşmak isterseniz",
+    whatsappCta: "WhatsApp'tan yazın",
     locationTitle: "Ofis konumu",
     footer: "AutoRent. Tüm hakları saklıdır.",
     stats: ["Bakımlı filo", "7/24 destek", "Şeffaf fiyat"],
@@ -119,7 +129,7 @@ const copy: Record<Language, Copy> = {
     servicesTitle: "Services that make renting easier",
     bookingTitle: "Quick booking",
     bookingText:
-      "Fill in the form — your request is saved and sent as a prepared WhatsApp message.",
+      "Fill in the form and we will get back to you as soon as possible.",
     pickup: "Pick-up location",
     dropoff: "Drop-off location",
     pickupDate: "Pick-up date",
@@ -135,6 +145,8 @@ const copy: Record<Language, Copy> = {
       "Your request has been received. However this car looks booked for those dates; we will contact you with an alternative.",
     validationMsg: "Please fill in every field and make sure the return date is after the pick-up date.",
     errorMsg: "We could not save your request. Please try again or call us.",
+    whatsappHint: "Prefer to talk right away?",
+    whatsappCta: "Message us on WhatsApp",
     locationTitle: "Office location",
     footer: "AutoRent. All rights reserved.",
     stats: ["Maintained fleet", "24/7 support", "Clear pricing"],
@@ -171,7 +183,7 @@ const copy: Record<Language, Copy> = {
     servicesTitle: "Services für eine einfache Anmietung",
     bookingTitle: "Schnelle Buchung",
     bookingText:
-      "Formular ausfüllen — Ihre Anfrage wird gespeichert und per WhatsApp gesendet.",
+      "Formular ausfüllen — wir melden uns so schnell wie möglich bei Ihnen.",
     pickup: "Abholort",
     dropoff: "Rückgabeort",
     pickupDate: "Abholdatum",
@@ -187,6 +199,8 @@ const copy: Record<Language, Copy> = {
       "Ihre Anfrage ist eingegangen. Dieses Fahrzeug scheint jedoch belegt zu sein; wir melden uns mit einer Alternative.",
     validationMsg: "Bitte füllen Sie alle Felder aus und achten Sie darauf, dass das Rückgabedatum nach dem Abholdatum liegt.",
     errorMsg: "Ihre Anfrage konnte nicht gespeichert werden. Bitte versuchen Sie es erneut.",
+    whatsappHint: "Lieber direkt sprechen?",
+    whatsappCta: "Schreiben Sie uns per WhatsApp",
     locationTitle: "Bürostandort",
     footer: "AutoRent. Alle Rechte vorbehalten.",
     stats: ["Gepflegte Flotte", "24/7 Support", "Klare Preise"],
@@ -211,7 +225,7 @@ const copy: Record<Language, Copy> = {
     servicesTitle: "Servicios para alquilar con facilidad",
     bookingTitle: "Reserva rápida",
     bookingText:
-      "Completa el formulario — tu solicitud se guarda y se envía por WhatsApp.",
+      "Completa el formulario y te responderemos lo antes posible.",
     pickup: "Lugar de recogida",
     dropoff: "Lugar de entrega",
     pickupDate: "Fecha de recogida",
@@ -227,6 +241,8 @@ const copy: Record<Language, Copy> = {
       "Hemos recibido tu solicitud. Sin embargo este coche parece ocupado en esas fechas; te contactaremos con una alternativa.",
     validationMsg: "Completa todos los campos y asegúrate de que la fecha de devolución sea posterior a la de recogida.",
     errorMsg: "No pudimos guardar tu solicitud. Inténtalo de nuevo o llámanos.",
+    whatsappHint: "¿Prefieres hablar ahora?",
+    whatsappCta: "Escríbenos por WhatsApp",
     locationTitle: "Ubicación",
     footer: "AutoRent. Todos los derechos reservados.",
     stats: ["Flota cuidada", "Soporte 24/7", "Precio claro"],
@@ -251,7 +267,7 @@ const copy: Record<Language, Copy> = {
     servicesTitle: "Des services simples pour votre location",
     bookingTitle: "Réservation rapide",
     bookingText:
-      "Remplissez le formulaire — votre demande est enregistrée puis envoyée via WhatsApp.",
+      "Remplissez le formulaire et nous vous répondrons dans les plus brefs délais.",
     pickup: "Lieu de départ",
     dropoff: "Lieu de retour",
     pickupDate: "Date de départ",
@@ -267,6 +283,8 @@ const copy: Record<Language, Copy> = {
       "Votre demande a bien été reçue. Ce véhicule semble toutefois réservé à ces dates ; nous vous proposerons une alternative.",
     validationMsg: "Merci de remplir tous les champs et de vérifier que la date de retour suit la date de départ.",
     errorMsg: "Nous n'avons pas pu enregistrer votre demande. Veuillez réessayer.",
+    whatsappHint: "Vous préférez discuter tout de suite ?",
+    whatsappCta: "Écrivez-nous sur WhatsApp",
     locationTitle: "Adresse",
     footer: "AutoRent. Tous droits réservés.",
     stats: ["Flotte entretenue", "Support 24/7", "Prix clairs"],
@@ -327,21 +345,6 @@ export default function HomeContent({ cars }: { cars: Car[] }) {
   const t = copy[language];
   const selectedCar = cars.find((car) => car.id === booking.carId) ?? cars[0];
 
-  const whatsappLink = useMemo(() => {
-    const message = [
-      "Merhaba, arac kiralama bilgisi almak istiyorum.",
-      `Ad: ${booking.name || "-"}`,
-      `Telefon: ${booking.phone || "-"}`,
-      `Alis: ${booking.pickup || "-"}`,
-      `Teslim: ${booking.dropoff || "-"}`,
-      `Alis tarihi: ${booking.pickupDate || "-"}`,
-      `Donus tarihi: ${booking.returnDate || "-"}`,
-      `Arac: ${selectedCar?.model ?? "-"}`,
-    ].join("\n");
-
-    return `https://api.whatsapp.com/send?phone=${WHATSAPP_PHONE}&text=${encodeURIComponent(message)}`;
-  }, [booking, selectedCar]);
-
   function updateBooking(field: keyof typeof booking, value: string) {
     setBooking((current) => ({ ...current, [field]: value }));
     setFormState({ kind: "idle" });
@@ -368,7 +371,6 @@ export default function HomeContent({ cars }: { cars: Car[] }) {
       }
 
       setFormState({ kind: "success", conflict: result.conflict });
-      window.open(whatsappLink, "_blank", "noopener,noreferrer");
     });
   }
 
@@ -591,9 +593,21 @@ export default function HomeContent({ cars }: { cars: Car[] }) {
               disabled={isPending || cars.length === 0}
               type="submit"
             >
-              <i className="fab fa-whatsapp" />
               {isPending ? t.sending : t.send}
             </button>
+
+            <p className="mt-5 border-t border-slate-100 pt-5 text-center text-sm text-slate-500">
+              {t.whatsappHint}{" "}
+              <a
+                className="inline-flex items-center gap-1.5 font-semibold text-emerald-700 hover:text-emerald-900"
+                href={WHATSAPP_URL}
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                <i className="fab fa-whatsapp" />
+                {t.whatsappCta}
+              </a>
+            </p>
           </form>
         </div>
       </section>

@@ -9,8 +9,9 @@ kaydedilir ve GateHub ile korunan yönetim panelinden yönetilir.
 - **Tek sayfa tanıtım sitesi** — 5 dil (TR/EN/DE/ES/FR), istemci tarafı sözlükle
 - **Veritabanı destekli filo** — araçlar `rental_cars` tablosundan okunur, fiyat
   değişikliği için deploy gerekmez
-- **Rezervasyon sistemi** — talepler `rental_bookings` tablosuna yazılır, ardından
-  hazır WhatsApp mesajı açılır
+- **Rezervasyon sistemi** — talepler `rental_bookings` tablosuna yazılır ve
+  yöneticiye Resend ile e-posta bildirimi gider. WhatsApp, formdan bağımsız
+  ikincil bir iletişim kanalı olarak durur
 - **Müsaitlik kontrolü** — seçilen tarihlerde araç doluysa ziyaretçi uyarılır
 - **Yönetim paneli** (`/admin`) — talepleri onaylama/iptal etme, filo düzenleme
 - **SEO** — metadata, sitemap, robots, üretilen OG görseli, JSON-LD (`AutoRental`)

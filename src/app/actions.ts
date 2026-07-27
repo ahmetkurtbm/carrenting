@@ -1,6 +1,7 @@
 "use server";
 
 import { createBooking, findConflictingBookings } from "@/lib/rental";
+import { sendBookingNotification } from "@/lib/mail";
 
 export type BookingResult =
   | { ok: true; conflict: boolean }
@@ -36,10 +37,22 @@ export async function submitBooking(formData: FormData): Promise<BookingResult> 
     // booking is surfaced to the visitor as a warning but the admin decides.
     const conflicts = await findConflictingBookings(carId, pickupDate, returnDate);
 
-    await createBooking({
+    const booking = await createBooking({
       carId,
       fullName,
       phone,
+      pickupLocation,
+      dropoffLocation,
+      pickupDate,
+      returnDate,
+    });
+
+    // Deliberately not awaited into the failure path: the booking is already
+    // stored, so a mail problem must not be reported to the visitor as an error.
+    await sendBookingNotification({
+      fullName,
+      phone,
+      carModel: booking.carModel ?? "-",
       pickupLocation,
       dropoffLocation,
       pickupDate,

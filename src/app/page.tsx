@@ -2,9 +2,10 @@ import HomeContent from "./HomeContent";
 import { listActiveCars } from "@/lib/rental";
 import { siteUrl } from "@/lib/site";
 
-// Cars come from the database, so the landing page must not be statically
-// cached at build time — a price change in the admin panel should show up.
-export const dynamic = "force-dynamic";
+// Cars change rarely, so the page is cached and served from the CDN instead of
+// hitting the database on every visit. Editing a car in the admin panel calls
+// revalidatePath("/"), so changes still appear immediately.
+export const revalidate = 300;
 
 export default async function Home() {
   const cars = await listActiveCars();
