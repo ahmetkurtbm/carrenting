@@ -1,8 +1,10 @@
 import Link from "next/link";
 import { listBookings } from "@/lib/rental";
+import { isDatabaseConfigured } from "@/lib/supabase";
 import { formatDate } from "@/lib/format";
 import type { Booking, BookingStatus } from "@/lib/types";
 import { setBookingStatus } from "./actions";
+import DatabaseWarning from "./DatabaseWarning";
 
 export const dynamic = "force-dynamic";
 
@@ -62,6 +64,15 @@ export default async function AdminBookingsPage({
 }) {
   const { status } = await searchParams;
   const filter = status && isStatus(status) ? status : undefined;
+
+  if (!isDatabaseConfigured()) {
+    return (
+      <div>
+        <h1 className="mb-6 text-2xl font-bold tracking-tight">Rezervasyonlar</h1>
+        <DatabaseWarning />
+      </div>
+    );
+  }
 
   const [bookings, allBookings] = await Promise.all([
     listBookings(filter),

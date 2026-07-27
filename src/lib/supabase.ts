@@ -16,7 +16,8 @@ export function isDatabaseConfigured() {
 export function getSupabase() {
   if (!url || !serviceRoleKey) {
     throw new Error(
-      "SUPABASE_URL ve SUPABASE_SERVICE_ROLE_KEY tanimli degil. .env.local dosyasini kontrol edin."
+      "SUPABASE_URL ve SUPABASE_SERVICE_ROLE_KEY tanimli degil. " +
+        "Yerelde .env.local dosyasini, Vercel'de proje ayarlarindaki Environment Variables bolumunu kontrol edin."
     );
   }
 

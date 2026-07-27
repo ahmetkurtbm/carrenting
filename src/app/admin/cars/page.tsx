@@ -1,7 +1,9 @@
 import { listAllCars } from "@/lib/rental";
+import { isDatabaseConfigured } from "@/lib/supabase";
 import { formatPrice } from "@/lib/format";
 import type { Car } from "@/lib/types";
 import { saveCar } from "../actions";
+import DatabaseWarning from "../DatabaseWarning";
 
 export const dynamic = "force-dynamic";
 
@@ -78,6 +80,15 @@ function CarForm({ car }: { car?: Car }) {
 }
 
 export default async function AdminCarsPage() {
+  if (!isDatabaseConfigured()) {
+    return (
+      <div>
+        <h1 className="mb-6 text-2xl font-bold tracking-tight">Filo</h1>
+        <DatabaseWarning />
+      </div>
+    );
+  }
+
   const cars = await listAllCars();
 
   return (
