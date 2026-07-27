@@ -7,7 +7,11 @@ import { createClient } from "@supabase/supabase-js";
 // which bypasses RLS — that is why this module is server-only and the key is
 // deliberately not exposed under a NEXT_PUBLIC_ name.
 const url = process.env.SUPABASE_URL;
-const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+// Supabase's new API keys call this a "secret key" (sb_secret_...); the legacy
+// name was service_role. Either works here — accept both variable names.
+const serviceRoleKey =
+  process.env.SUPABASE_SECRET_KEY ?? process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 export function isDatabaseConfigured() {
   return Boolean(url && serviceRoleKey);
@@ -16,7 +20,7 @@ export function isDatabaseConfigured() {
 export function getSupabase() {
   if (!url || !serviceRoleKey) {
     throw new Error(
-      "SUPABASE_URL ve SUPABASE_SERVICE_ROLE_KEY tanimli degil. " +
+      "SUPABASE_URL ve SUPABASE_SECRET_KEY (veya SUPABASE_SERVICE_ROLE_KEY) tanimli degil. " +
         "Yerelde .env.local dosyasini, Vercel'de proje ayarlarindaki Environment Variables bolumunu kontrol edin."
     );
   }

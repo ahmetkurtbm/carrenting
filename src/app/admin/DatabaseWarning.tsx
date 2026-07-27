@@ -11,8 +11,8 @@ export default function DatabaseWarning() {
       </h2>
       <p className="mt-2 text-sm leading-relaxed text-amber-800">
         <code className="font-mono">SUPABASE_URL</code> ve{" "}
-        <code className="font-mono">SUPABASE_SERVICE_ROLE_KEY</code> tanimli
-        degil, bu yuzden rezervasyon ve filo verileri okunamiyor.
+        <code className="font-mono">SUPABASE_SECRET_KEY</code> tanimli degil, bu
+        yuzden rezervasyon ve filo verileri okunamiyor.
       </p>
       <ul className="mt-4 list-disc space-y-1 pl-5 text-sm text-amber-800">
         <li>Yerelde: bu iki degeri .env.local dosyasina ekleyin.</li>
